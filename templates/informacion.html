@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información Combinada</title>
+</head>
+<body>
+    <h1>Información Combinada</h1>
+
+    <h2>Clientes Registrados:</h2>
+    <ul>
+        {% for cliente in clientes %}
+        <li>{{ cliente[1] }} - {{ cliente[2] }} - {{ cliente[3] }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Distritos Registrados:</h2>
+    <ul>
+        {% for distrito in distritos %}
+        <li>{{ distrito[1] }} - {{ distrito[2] }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Precio de la Criptomoneda (BTCUSD):</h2>
+    {% if precio_cripto %}
+        <p>El precio actual de BTC es: ${{ precio_cripto }}</p>
+    {% else %}
+        <p>No se pudo obtener el precio de la criptomoneda.</p>
+    {% endif %}
+</body>
+</html>

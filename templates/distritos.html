@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distritos Registrados</title>
+</head>
+<body>
+    <h1>Distritos Registrados</h1>
+
+    <!-- Formulario para agregar un nuevo distrito -->
+    <h2>Agregar Distrito</h2>
+    <form action="/distritos" method="POST">
+        <label for="nombre">Nombre del Distrito:</label>
+        <input type="text" name="nombre" id="nombre" required><br><br>
+
+        <label for="provincia">Provincia:</label>
+        <input type="text" name="provincia" id="provincia" required><br><br>
+
+        <button type="submit">Agregar Distrito</button>
+    </form>
+
+    <h2>Lista de Distritos</h2>
+    <ul>
+        {% for distrito in distritos %}
+        <li>{{ distrito[1] }} - {{ distrito[2] }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2><a href="/clientes">Ver Clientes</a></h2>
+</body>
+</html>

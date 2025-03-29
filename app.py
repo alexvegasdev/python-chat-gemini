@@ -1,53 +1,51 @@
-from flask import Flask, render_template, request
-import requests
-from config import API_KEY  # Asegúrate de que este archivo tenga tu clave de API
-from database import crear_base_datos, obtener_clientes, agregar_cliente
+from flask import Flask, render_template, request, redirect, url_for
+from database import crear_base_datos, obtener_clientes, obtener_distritos, agregar_cliente, agregar_distrito
 
-# Inicialización de la aplicación Flask
 app = Flask(__name__)
 
 # Crear base de datos al iniciar la aplicación
 crear_base_datos()
 
-# Función para obtener el precio de una criptomoneda usando la API de Gemini
-def obtener_precio_cripto(symbol="BTCUSD"):
-    url = f"https://api.gemini.com/v1/pubticker/{symbol}"
-    headers = {
-        "Content-Type": "application/json",
-        "X-GEMINI-APIKEY": API_KEY  # Asegúrate de que la clave esté correctamente configurada
-    }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    if 'last' in data:
-        return data['last']  # Último precio
-    return None
-
-# Rutas de la aplicación
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/clientes')
+@app.route('/consulta', methods=['GET'])
+def consulta():
+    duda = request.args.get('consulta')
+    
+    # Aquí interpretamos la consulta. Si la consulta tiene que ver con criptomonedas, podemos buscarlo en la API.
+    if "cripto" in duda.lower() or "precio" in duda.lower():
+        # Lógica para consultar criptomonedas (no incluida aquí)
+        return f"Tu consulta es sobre criptomonedas: {duda}"
+    else:
+        # Lógica para manejar otras consultas
+        return f"Tu consulta es: {duda}. En este momento solo puedo mostrar precios de criptomonedas."
+
+# Ruta para mostrar y agregar clientes
+@app.route('/clientes', methods=['GET', 'POST'])
 def clientes():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        correo = request.form['correo']
+        telefono = request.form['telefono']
+        agregar_cliente(nombre, correo, telefono)
+        return redirect(url_for('clientes'))  # Redirige para evitar reenvíos de formulario
+
     clientes = obtener_clientes()
     return render_template('clientes.html', clientes=clientes)
 
-@app.route('/precio_cripto', methods=['GET'])
-def precio_cripto():
-    symbol = request.args.get('symbol', 'BTCUSD')
-    precio = obtener_precio_cripto(symbol)
-    if precio:
-        return f"El precio actual de {symbol} es: ${precio}"
-    else:
-        return f"No se pudo obtener el precio de {symbol}"
+# Ruta para mostrar y agregar distritos
+@app.route('/distritos', methods=['GET', 'POST'])
+def distritos():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        provincia = request.form['provincia']
+        agregar_distrito(nombre, provincia)
+        return redirect(url_for('distritos'))  # Redirige para evitar reenvíos de formulario
 
-@app.route('/agregar_cliente', methods=['POST'])
-def agregar():
-    nombre = request.form['nombre']
-    correo = request.form['correo']
-    telefono = request.form['telefono']
-    agregar_cliente(nombre, correo, telefono)
-    return "Cliente agregado con éxito"
+    distritos = obtener_distritos()
+    return render_template('distritos.html', distritos=distritos)
 
 # Inicializa el servidor cuando el script se ejecute
 if __name__ == '__main__':
