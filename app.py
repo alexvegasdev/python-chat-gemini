@@ -44,7 +44,7 @@ def consulta():
 
     # Respuesta por defecto si no se puede entender la consulta
     else:
-        respuesta = f"Tu consulta es: {duda}. En este momento solo puedo mostrar precios de criptomonedas, clientes o distritos."
+        respuesta = f"Tu consulta es: {duda}. En este momento solo puedo mostrar clientes o distritos."
 
     # Regresar la respuesta a la página de inicio (index.html)
     return render_template('index.html', respuesta=respuesta)
