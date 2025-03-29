@@ -46,7 +46,15 @@ def consultar_gemini(prompt):
     
     if response.status_code == 200:
         respuesta = response.json()
-        return respuesta.get("candidates", [{}])[0].get("content", "No response received")
+        # Extraer solo el texto de la respuesta
+        if "candidates" in respuesta and respuesta["candidates"]:
+            if "content" in respuesta["candidates"][0]:
+                content = respuesta["candidates"][0]["content"]
+                if "parts" in content and content["parts"]:
+                    for part in content["parts"]:
+                        if "text" in part:
+                            return part["text"]  # Devuelve solo el texto
+        return "No se pudo extraer una respuesta de texto"
     else:
         return f"Error: {response.status_code} - {response.text}"
 
