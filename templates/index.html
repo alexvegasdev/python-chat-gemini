@@ -13,6 +13,11 @@
         <button type="submit">Consultar</button>
     </form>
 
+    {% if respuesta %}
+    <h2>Resultado de la consulta:</h2>
+    <div>{{ respuesta | safe }}</div>
+    {% endif %}
+
     <h2><a href="/clientes">Ver Clientes</a></h2>
     <h2><a href="/distritos">Ver Distritos</a></h2>
     <h2><a href="/informacion">Ver Información Combinada</a></h2>
