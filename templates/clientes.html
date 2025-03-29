@@ -2,34 +2,28 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clientes Registrados</title>
+    <title>Clientes</title>
 </head>
 <body>
-    <h1>Clientes Registrados</h1>
-
-    <!-- Formulario para agregar un nuevo cliente -->
-    <h2>Agregar Cliente</h2>
-    <form action="/clientes" method="POST">
-        <label for="nombre">Nombre:</label>
-        <input type="text" name="nombre" id="nombre" required><br><br>
-
-        <label for="correo">Correo:</label>
-        <input type="email" name="correo" id="correo" required><br><br>
-
-        <label for="telefono">Teléfono:</label>
-        <input type="text" name="telefono" id="telefono" required><br><br>
-
+    <h1>Clientes</h1>
+    <form action="/clientes" method="post">
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="email" name="correo" placeholder="Correo" required>
+        <input type="text" name="telefono" placeholder="Teléfono" required>
+        <select name="distrito_id">
+            <option value="">Selecciona un distrito</option>
+            {% for distrito in distritos %}
+            <option value="{{ distrito[0] }}">{{ distrito[1] }}</option>
+            {% endfor %}
+        </select>
         <button type="submit">Agregar Cliente</button>
     </form>
 
     <h2>Lista de Clientes</h2>
     <ul>
         {% for cliente in clientes %}
-        <li>{{ cliente[1] }} - {{ cliente[2] }} - {{ cliente[3] }}</li>
+        <li>{{ cliente[1] }} ({{ cliente[2] }} - {{ cliente[3] }}) - Distrito: {{ cliente[4] if cliente[4] else "Sin distrito" }}</li>
         {% endfor %}
     </ul>
-
-    <h2><a href="/distritos">Ver Distritos</a></h2>
 </body>
 </html>

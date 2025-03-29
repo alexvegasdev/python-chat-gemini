@@ -1,2 +1,2 @@
-API_KEY = 'AIzaSyBIwvq0seBH9LdjcZGvRUP7rb81ct1zjxk'  # Reemplaza con tu API Key de Gemini
-DATABASE = 'app.db'
+API_KEY = 'AIzaSyBS391Ra9qEbGNhKH4VrgTj4Re_fhzwVr8'  # Reemplaza con tu API Key de Gemini
+DATABASE = 'database.db'

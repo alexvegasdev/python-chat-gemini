@@ -1,79 +1,88 @@
-from flask import Flask, render_template, request, redirect, url_for
-from database import crear_base_datos, obtener_clientes, obtener_distritos, agregar_cliente, agregar_distrito
+from flask import Flask, render_template, request
 import sqlite3
-from config import DATABASE
+import requests
+import config  # Archivo de configuración con la API Key y base de datos
 
 app = Flask(__name__)
 
-# Crear base de datos al iniciar la aplicación
-crear_base_datos()
+# 📌 Función para obtener datos de SQLite
+def obtener_datos():
+    conn = sqlite3.connect(config.DATABASE)
+    cursor = conn.cursor()
 
-# Ruta para la página principal
-@app.route('/')
-def index():
-    return render_template('index.html')
+    # ✅ Traemos los clientes junto con su distrito
+    cursor.execute("""
+        SELECT clientes.nombre, clientes.correo, clientes.telefono, distritos.nombre 
+        FROM clientes 
+        JOIN distritos ON clientes.distrito_id = distritos.id
+    """)
+    clientes = cursor.fetchall()
 
-# Ruta para manejar las consultas
+    # ✅ Contamos cuántos clientes hay por distrito
+    cursor.execute("""
+        SELECT distritos.nombre, COUNT(clientes.id) AS total_clientes 
+        FROM clientes 
+        JOIN distritos ON clientes.distrito_id = distritos.id
+        GROUP BY distritos.nombre
+        ORDER BY total_clientes DESC
+    """)
+    distritos = cursor.fetchall()
+
+    conn.close()
+    return clientes, distritos
+
+# 📌 Función para hacer la consulta a Gemini API
+def consultar_gemini(prompt):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={config.API_KEY}"
+    
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    
+    if response.status_code == 200:
+        respuesta = response.json()
+        return respuesta.get("candidates", [{}])[0].get("content", "No response received")
+    else:
+        return f"Error: {response.status_code} - {response.text}"
+
 @app.route('/consulta', methods=['GET'])
 def consulta():
     duda = request.args.get('consulta', '').lower()
 
-    # Variable para almacenar la respuesta
-    respuesta = ""
+    # 📌 Obtener datos de la base de datos
+    clientes, distritos = obtener_datos()
 
-    # Consultar por clientes
-    if 'clientes' in duda:
-        clientes = obtener_clientes()
-        respuesta = '<ul>'
-        for cliente in clientes:
-            respuesta += f'<li>{cliente[1]} ({cliente[2]} - {cliente[3]})</li>'
-        respuesta += '</ul>'
-    
-    # Consultar por distritos
-    elif 'distritos' in duda:
-        distritos = obtener_distritos()
-        respuesta = '<ul>'
-        for distrito in distritos:
-            respuesta += f'<li>{distrito[1]}, {distrito[2]}</li>'
-        respuesta += '</ul>'
+    # ✅ Formateamos los clientes con su distrito
+    clientes_str = "\n".join([f"{c[0]} - {c[1]} - {c[2]} - {c[3]}" for c in clientes])
 
-    # Consultas relacionadas con criptomonedas
-    elif 'cripto' in duda or 'precio' in duda:
-        # Aquí puedes agregar tu lógica de consulta de criptomonedas
-        respuesta = f"Tu consulta es sobre criptomonedas: {duda}"
+    # ✅ Mostramos cuántos clientes hay en cada distrito
+    distritos_str = "\n".join([f"{d[0]}: {d[1]} clientes" for d in distritos])
 
-    # Respuesta por defecto si no se puede entender la consulta
-    else:
-        respuesta = f"Tu consulta es: {duda}. En este momento solo puedo mostrar clientes o distritos."
+    datos_completos = f"""
+    Lista de clientes con su distrito:
+    {clientes_str}
 
-    # Regresar la respuesta a la página de inicio (index.html)
+    Cantidad de clientes por distrito:
+    {distritos_str}
+    """
+
+    # 📌 Crear el prompt para Gemini
+    prompt = f"""
+    Aquí tienes información de clientes y distritos. 
+    Responde la siguiente pregunta de manera clara y directa:
+
+    Pregunta: {duda}
+    """
+
+    # 📌 Enviar la consulta a Gemini
+    respuesta = consultar_gemini(datos_completos + "\n\n" + prompt)
+
     return render_template('index.html', respuesta=respuesta)
 
-# Ruta para mostrar y agregar clientes
-@app.route('/clientes', methods=['GET', 'POST'])
-def clientes():
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        correo = request.form['correo']
-        telefono = request.form['telefono']
-        agregar_cliente(nombre, correo, telefono)
-        return redirect(url_for('clientes'))  # Redirige para evitar reenvíos de formulario
-
-    clientes = obtener_clientes()
-    return render_template('clientes.html', clientes=clientes)
-
-# Ruta para mostrar y agregar distritos
-@app.route('/distritos', methods=['GET', 'POST'])
-def distritos():
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        provincia = request.form['provincia']
-        agregar_distrito(nombre, provincia)
-        return redirect(url_for('distritos'))  # Redirige para evitar reenvíos de formulario
-
-    distritos = obtener_distritos()
-    return render_template('distritos.html', distritos=distritos)
-
-# Inicializa el servidor cuando el script se ejecute
 if __name__ == '__main__':
     app.run(debug=True)
