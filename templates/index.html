@@ -2,17 +2,119 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Inicio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Clientes y Distritos</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            padding: 20px;
+            background-color: #fff;
+            margin: 0;
+            border-bottom: 2px solid #ddd;
+        }
+
+        h2 {
+            color: #4CAF50;
+            margin-top: 20px;
+        }
+
+        /* Contenedor principal */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Formulario de consulta */
+        .form-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-container input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+
+        /* Resultado de la consulta */
+        .respuesta {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            border: 1px solid #4CAF50;
+        }
+
+        .respuesta p {
+            margin: 0;
+            color: #333;
+        }
+
+        /* Estilos para pantallas pequeñas */
+        @media (max-width: 600px) {
+            .form-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-container input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .form-container button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Bienvenido</h1>
-    <form action="/consulta" method="get">
-        <input type="text" name="consulta" placeholder="Escribe clientes o distritos">
-        <button type="submit">Consultar</button>
-    </form>
-    {% if respuesta %}
-        <h2>Resultado:</h2>
-        <p>{{ respuesta|safe }}</p>
-    {% endif %}
+    <h1>Consulta de Clientes y Distritos</h1>
+    <div class="container">
+        <form action="/consulta" method="get" class="form-container">
+            <input type="text" name="consulta" placeholder="Escribe clientes o distritos" required>
+            <button type="submit">Consultar</button>
+        </form>
+
+        {% if respuesta %}
+            <div class="respuesta">
+                <h2>Resultado:</h2>
+                <p>{{ respuesta|safe }}</p>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>
